@@ -6,7 +6,7 @@ and Karl W. Broman, Department of Biostatistics, Johns Hopkins
 University) from 2002-07-29.
 
 _Related paper_: Lamichhane G, Zignol M, Blades NJ, Geiman DE,
-Dougherty A, **Broman KW**, Bishai WR (2003) A post-genomic method for
+Dougherty A, Broman KW, Bishai WR (2003) A post-genomic method for
 predicting essential genes at subsaturation levels of mutagenesis:
 application to <i>Mycobacterium tuberculosis</i>. [Proc Natl Acad Sci
 USA](http://www.pnas.org/) 100:7213-7218
