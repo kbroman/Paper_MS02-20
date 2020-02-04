@@ -1,0 +1,148 @@
+# fig 1: example sequence
+source("mt598.R")
+
+# fig 2: histogram of number of ta sites
+postscript("../Figs/fig2.ps",horiz=FALSE,width=6.5,height=2)
+par(mar=c(4.1,0.1,0.1,0.1))
+hist(numTAs,breaks=30,ylab="",yaxt="n",xlab="Number of TA sites",main="",xaxt="n")
+u <- par("usr")
+x <- numTAs + runif(length(numTAs),-0.4,0.4)
+segments(x,u[3]-diff(u[3:4])*0.03,x,0,xpd=TRUE)
+segments(0,u[3]-diff(u[3:4])*0.03,u[2],u[3]-diff(u[3:4])*0.03,xpd=TRUE)
+segments(0,0,u[2],0,xpd=TRUE)
+x <- seq(0,150,by=25)
+segments(x,u[3]-diff(u[3:4])*0.03,x,2*(u[3]-diff(u[3:4])*0.03),xpd=TRUE)
+text(x,2*(u[3]-diff(u[3:4])*0.1),paste(x),xpd=TRUE)
+dev.off()
+
+# fig 3: Gibbs traces from different starting points
+postscript("../Figs/fig3.ps",horiz=FALSE,width=7,height=4)
+par(las=1,mar=c(4.1,5.1,0.1,0.1))
+plot(output[[1]]$n.essential, ylim=c(0,3235),
+     xlab="", ylab="",type="n")
+u <- par("usr")
+text(u[1]-diff(u[1:2])*0.15,mean(u[3:4]),"No. essential genes",
+     cex=1.2, srt=90, xpd=TRUE)
+text(mean(u[1:2]),u[3]-diff(u[3:4])*0.23,"MCMC steps",cex=1.2,xpd=TRUE)
+abline(h=1850,lty=2,lwd=2)
+for(i in c(3:5,2,1))
+  lines(output[[i]]$n.essential, col=c("black","blue","red","green","orange")[i])
+rm(u)
+dev.off()
+
+require(tseries)
+postscript("../Figs/fig4.ps",horiz=FALSE,width=7,height=3)
+par(las=1,mar=c(4.1,5.1,0.1,0.1))
+plot.acf(myacf,ci.type="ma",ci.col="black",main="",ylab="ACF",ylim=c(-0.05,0.2))
+dev.off()
+
+postscript("../Figs/fig5.ps",horiz=FALSE,width=7,height=3)
+par(las=1,mar=c(4.1,5.1,0.1,0.1))
+plot(moreoutput$n.essential[seq(1,50000,by=50)],xlab="MCMC steps / 50",
+     ylab="",type="l")
+u <- par("usr")
+text(u[1]-diff(u[1:2])*0.13,mean(u[3:4]),"No. essential genes",srt=90,xpd=TRUE)
+dev.off()
+
+postscript("../Figs/fig6.ps",horiz=FALSE,width=7,height=3)
+par(las=1,mar=c(4.1,4.1,0.1,0.1))
+p <- geneprob/round(max(geneprob),-3)
+p[p==0] <- p[p==0] + runif(sum(p==0),-0.03,0.03)
+plot(numTAs,p, xlab="No. insertion sites", ylab="Pr(gene is essential | data)",
+     ylim=c(-0.03,1),type="n")
+abline(h=seq(0,1,by=0.1),lty=2)
+points(numTAs,p,cex=0.7)
+points(numTAs[1921:1922],p[1921:1922],cex=0.7,col="red",lwd=2)
+dev.off()
+
+# fig 7: simulation results
+postscript("../Figs/fig7.ps",horiz=FALSE,height=8,width=7)
+par(mar=c(5.6,4.1,2.1,2.1),mfrow=c(3,1),las=1)
+yl <- range(c(sim.bias[1,]-2*sim.bias[2,],sim.bias[1,]+2*sim.bias[2,]),na.rm=TRUE)
+yl <- c(-1.1,0.2)
+plot(0,0,type="n",xaxt="n",ylim=yl,xlim=c(0.5,12.5),
+     xlab="No. mutants",ylab="Bias")
+u <- par("usr")
+first <- u[1];last <- u[2]
+x <- seq(first+(last-first)/24,last-(last-first)/24,len=12)
+segments(x,u[3],x,u[3]-diff(u[3:4])*0.05,xpd=TRUE)
+text(x,u[3]-diff(u[3:4])*0.12,as.character(rep(c(750,1500,3000,4500),3)),xpd=TRUE)
+abline(v=c(mean(x[4:5]),mean(x[8:9])))
+abline(h=0,lty=2)
+text(mean(x[2:3]),u[4]+diff(u[3:4])*0.08,"25% essential",xpd=TRUE)
+text(mean(x[6:7]),u[4]+diff(u[3:4])*0.08,"50% essential",xpd=TRUE)
+text(mean(x[10:11]),u[4]+diff(u[3:4])*0.08,"75% essential",xpd=TRUE)
+segments(x,sim.bias[1,]-2*sim.bias[2,],x,sim.bias[1,]+2*sim.bias[2,],lwd=2)
+segments(x-0.2,sim.bias[1,],x+0.2,sim.bias[1,],lwd=2)
+segments(x-0.1,sim.bias[1,]-2*sim.bias[2,],x+0.1,sim.bias[1,]-2*sim.bias[2,],lwd=2)
+segments(x-0.1,sim.bias[1,]+2*sim.bias[2,],x+0.1,sim.bias[1,]+2*sim.bias[2,],lwd=2)
+text(u[1]-diff(u[1:2])*0.06,u[4]+diff(u[3:4])*0.12,"A",font=2,xpd=TRUE,cex=1.5)
+
+yl <- range(c(sim.cov[2:3,]),na.rm=TRUE)
+#yl <- c(91.5,97.5)
+plot(0,0,type="n",xaxt="n",ylim=yl,xlim=c(0.5,12.5),
+     xlab="No. mutants",ylab="Interval coverage (%)")
+u <- par("usr")
+first <- u[1];last <- u[2]
+x <- seq(first+(last-first)/24,last-(last-first)/24,len=12)
+segments(x,u[3],x,u[3]-diff(u[3:4])*0.05,xpd=TRUE)
+text(x,u[3]-diff(u[3:4])*0.12,as.character(rep(c(750,1500,3000,4500),3)),xpd=TRUE)
+abline(v=c(mean(x[4:5]),mean(x[8:9])))
+abline(h=95,lty=2)
+segments(x,sim.cov[2,],x,sim.cov[3,],lwd=2)
+segments(x-0.2,sim.cov[1,],x+0.2,sim.cov[1,],lwd=2)
+segments(x-0.1,sim.cov[2,],x+0.1,sim.cov[2,],lwd=2)
+segments(x-0.1,sim.cov[3,],x+0.1,sim.cov[3,],lwd=2)
+text(mean(x[2:3]),u[4]+diff(u[3:4])*0.08,"25% essential",xpd=TRUE)
+text(mean(x[6:7]),u[4]+diff(u[3:4])*0.08,"50% essential",xpd=TRUE)
+text(mean(x[10:11]),u[4]+diff(u[3:4])*0.08,"75% essential",xpd=TRUE)
+text(u[1]-diff(u[1:2])*0.06,u[4]+diff(u[3:4])*0.12,"B",font=2,xpd=TRUE,cex=1.5)
+
+yl <- range(c(sim.len[1,]-2*sim.len[2,],sim.len[1,]+2*sim.len[2,]),na.rm=TRUE)
+plot(0,0,type="n",xaxt="n",ylim=c(0,25),xlim=c(0.5,12.5),
+     xlab="No. mutants",ylab="Average interval length")
+u <- par("usr")
+first <- u[1];last <- u[2]
+x <- seq(first+(last-first)/24,last-(last-first)/24,len=12)
+segments(x,u[3],x,u[3]-diff(u[3:4])*0.05,xpd=TRUE)
+text(x,u[3]-diff(u[3:4])*0.12,as.character(rep(c(750,1500,3000,4500),3)),xpd=TRUE)
+abline(v=c(mean(x[4:5]),mean(x[8:9])))
+abline(h=seq(0,25,by=5),lty=2)
+text(mean(x[2:3]),u[4]+diff(u[3:4])*0.08,"25% essential",xpd=TRUE)
+text(mean(x[6:7]),u[4]+diff(u[3:4])*0.08,"50% essential",xpd=TRUE)
+text(mean(x[10:11]),u[4]+diff(u[3:4])*0.08,"75% essential",xpd=TRUE)
+text(u[1]-diff(u[1:2])*0.06,u[4]+diff(u[3:4])*0.12,"C",font=2,xpd=TRUE,cex=1.5)
+segments(x,sim.len[1,]-2*sim.len[2,],x,sim.len[1,]+2*sim.len[2,],lwd=2)
+segments(x-0.2,sim.len[1,],x+0.2,sim.len[1,],lwd=2)
+segments(x-0.1,sim.len[1,]-2*sim.len[2,],x+0.1,sim.len[1,]-2*sim.len[2,],lwd=2)
+segments(x-0.1,sim.len[1,]+2*sim.len[2,],x+0.1,sim.len[1,]+2*sim.len[2,],lwd=2)
+dev.off()
+
+
+# fig 8: operon results
+postscript("../Figs/fig8.ps",horiz=FALSE,height=3,width=7)
+par(mar=c(4.1,4.1,1.1,2.1),mfrow=c(1,2),las=1)
+plot(0,0,type="n",xaxt="n",ylim=c(-0.2,0.63),xlim=c(0.5,5.5),
+     xlab="% essential genes",ylab="Bias")
+u <- par("usr")
+segments(1:5,u[3],1:5,u[3]-diff(u[3:4])*0.05,xpd=TRUE)
+text(1:5,u[3]-diff(u[3:4])*0.12,as.character(seq(20,80,len=5)),xpd=TRUE)
+abline(h=0,lty=2)
+segments(1:5,op.bias[1,]-2*op.bias[2,],1:5,op.bias[1,]+2*op.bias[2,],lwd=2)
+segments(1:5-0.2,op.bias[1,],1:5+0.2,op.bias[1,],lwd=2)
+segments(1:5-0.1,op.bias[1,]-2*op.bias[2,],1:5+0.1,op.bias[1,]-2*op.bias[2,],lwd=2)
+segments(1:5-0.1,op.bias[1,]+2*op.bias[2,],1:5+0.1,op.bias[1,]+2*op.bias[2,],lwd=2)
+text(u[1]-diff(u[1:2])*0.3,u[4]+diff(u[3:4])*0.05,"A",font=2,xpd=TRUE,cex=1.3)
+plot(0,0,type="n",xaxt="n",ylim=c(91,97),xlim=c(0.5,5.5),
+     xlab="% essential genes",ylab="Interval coverage (%)")
+u <- par("usr")
+segments(1:5,u[3],1:5,u[3]-diff(u[3:4])*0.05,xpd=TRUE)
+text(1:5,u[3]-diff(u[3:4])*0.12,as.character(seq(20,80,len=5)),xpd=TRUE)
+abline(h=95,lty=2)
+segments(1:5,op.cov[2,],1:5,op.cov[3,],lwd=2)
+segments(1:5-0.2,op.cov[1,],1:5+0.2,op.cov[1,],lwd=2)
+segments(1:5-0.1,op.cov[2,],1:5+0.1,op.cov[2,],lwd=2)
+segments(1:5-0.1,op.cov[3,],1:5+0.1,op.cov[3,],lwd=2)
+text(u[1]-diff(u[1:2])*0.3,u[4]+diff(u[3:4])*0.05,"B",font=2,xpd=TRUE,cex=1.3)
+dev.off()
+
